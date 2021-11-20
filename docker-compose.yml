@@ -1,0 +1,44 @@
+version: '3'
+services:
+  app:
+    container_name: app
+    restart: always
+    build: ./app
+    ports:
+      - "3000:3000"
+    links:
+      - mongo
+      - search
+    env_file: ./app/.env
+    volumes:
+      - ./app:/usr/src/app
+  search:
+    container_name: search
+    restart: always
+    build: ./search
+    ports:
+      - "3001:3001"
+    links:
+      - elasticsearch
+    env_file: ./search/.env
+    volumes:
+      - ./search:/usr/src/search
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
+    env_file: ./app/.env
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
+    labels:
+      - co.elastic.logs/module=elasticsearch
+      - co.elastic.metrics/module=elasticsearch
+    ports: 
+      - 9200:9200
+    expose:
+      - 9200
+    environment:
+      - discovery.type=single-node
+      - http.cors.allow-origin= **
